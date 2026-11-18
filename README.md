@@ -1,6 +1,6 @@
 # GSB Bugfix Task
 ## 题面
-反向代理和上游服务器对 Content-Length 与 Transfer-Encoding 的解释不一致，攻击者可以构造 CL.TE 或 TE.CL 请求，把后半段夹带成下一个请求。smuggle_guard.py 的 parse_request 是核心，tests/test_smuggle_guard.py 15 个红。要修成同时出现 CL/TE、重复 CL、重复 TE、混淆 TE、负值、十六进制、带符号和空字节都拒绝，合法请求正常解析。15 个用例跑绿后，再用 1000 组随机头和 32 线程并发解析，确认没有走私；不许改测试或硬编码头名。边界至少覆盖 CL.TE、TE.CL、重复头、混淆 TE、负值、控制字符和空头。
+网关日志里出现两个请求被拼成一个的痕迹：前端送来的 Content-Length 和上游看到的 Transfer-Encoding 对不上，攻击者能借 CL.TE 或 TE.CL 把一段 payload 夹成队列里的下一个请求。仓库根目录的 smuggle_guard.py 负责判定，自带的 pytest 用例目前 15 条全部报错。判定逻辑要把同时带 CL 和 TE、CL 重复、TE 重复、TE 大小写或空白混淆、值里出现负号、加号、0x 前缀、逗号列表、尾部空白、CRLF 和 NUL 的情况统统拒掉，普通请求照常返回解析结果。写完后我会另起 800 组随机头、24 路并发灌进去，看还有没有请求能穿过；用例文件保持原样，头字段名也不允许硬编码。特别要盯 CL.TE、TE.CL、重复头、混淆 TE、负数和空头这些组合。
 
 ## 运行方式
 ```bash
