@@ -7,6 +7,26 @@ IP 白名单用字符串前缀匹配，10.0.0.1 能匹配 10.0.0.10，短写和�
 python -m pytest tests -q
 ```
 
+## 白名单配置与压测
+
+允许的网段通过环境变量配置（逗号分隔的 CIDR，未配置时默认全部拒绝），
+按 `IP_ALLOW_LIST`、`IP_ALLOWLIST`、`IP_WHITELIST` 的顺序读取：
+
+```bash
+IP_ALLOW_LIST="10.0.0.0/8,192.168.1.0/24" python -m pytest tests -q
+```
+
+`validate` 只接受规范的点分十进制 IPv4 字符串，先用严格正则和
+`ipaddress.IPv4Address` 双重校验，再按网段做位掩码匹配；短写（前导零）、
+十进制/十六进制整数、IPv4 映射地址、端口、CIDR 后缀、空白和控制字符一律拒绝。
+
+独立压测脚本（自带与被测代码无关的判定 oracle，1000 组随机 IP、32 线程）：
+
+```bash
+IP_ALLOW_LIST="10.0.0.0/8,192.168.1.0/24" python stress_ip_allow_guard.py
+# 换随机种子：STRESS_SEED=123 python stress_ip_allow_guard.py
+```
+
 ## 平台字段
 
 所属领域：安全
