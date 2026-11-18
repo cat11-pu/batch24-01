@@ -7,6 +7,14 @@ tar 解压不检查 symlink/hardlink，链接能指向目标目录外，后续�
 python -m pytest tests -q
 ```
 
+## 模糊 / 并发校验
+`fuzz_tar_guard.py` 生成 1000 组混合安全与恶意条目（绝对链接、`..` 穿越、
+hardlink、设备节点、空链接、超长、NUL、Windows 路径），用独立 oracle 交叉
+核对，并以 32 线程并发重放，确认没有条目能借链接逃逸出目标目录：
+```bash
+python fuzz_tar_guard.py
+```
+
 ## 平台字段
 
 所属领域：安全
