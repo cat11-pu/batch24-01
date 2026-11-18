@@ -7,6 +7,11 @@
 python -m pytest tests -q
 ```
 
+## 轮换演练（1300 组随机场景，25 线程并行）
+```bash
+python rotation_drill.py
+```
+
 ## 平台字段
 
 所属领域：安全
